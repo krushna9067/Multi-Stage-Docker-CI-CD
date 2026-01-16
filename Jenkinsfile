@@ -1,8 +1,9 @@
 pipeline {
     agent any
+
     stages {
 
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -10,11 +11,17 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                // Create and activate virtual environment
                 sh '''
+                # Create virtual environment
                 python3 -m venv venv
+
+                # Activate venv
                 source venv/bin/activate
+
+                # Upgrade pip inside venv
                 pip install --upgrade pip
+
+                # Install dependencies from requirements.txt
                 pip install -r requirements.txt
                 '''
             }
