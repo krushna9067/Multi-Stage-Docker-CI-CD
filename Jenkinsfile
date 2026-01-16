@@ -1,32 +1,34 @@
 pipeline {
     agent any
-    environment {
-        IMAGE_NAME = "multi-stage-app"
-    }
     stages {
-        stage('Checkout') {
+
+        stage('Checkout SCM') {
             steps {
-                git 'https://github.com/krushna9067/Multi-Stage-Docker-CI-CD.git'
+                checkout scm
             }
         }
+
         stage('Build & Test') {
             steps {
-                sh 'pip install -r requirements.txt'
-                sh 'pytest'
+                // Create and activate virtual environment
+                sh '''
+                python3 -m venv venv
+                source venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $IMAGE_NAME ."
+                sh 'docker build -t my-flask-app .'
             }
         }
+
         stage('Run Docker Container') {
             steps {
-                sh '''
-                docker stop multi-stage-app || true
-                docker rm multi-stage-app || true
-                docker run -d -p 5000:5000 --name multi-stage-app multi-stage-app
-                '''
+                sh 'docker run -d -p 5000:5000 my-flask-app'
             }
         }
     }
